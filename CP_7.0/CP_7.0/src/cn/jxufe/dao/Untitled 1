@@ -1,0 +1,226 @@
+package cn.myexam.model;
+
+import cn.myexam.hibernate.BaseHibernateDAO;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.LockMode;
+import org.hibernate.Query;
+import org.hibernate.Transaction;
+import org.hibernate.criterion.Example;
+
+/**
+ * 此方法适用于针对Student类的数据库操作
+
+ * 具体包括增删改查
+ * @author Fancy
+ * @date 2012-12-1
+ */
+public class StudentDAO extends BaseHibernateDAO {
+
+
+	private static final Log log = LogFactory.getLog(StudentDAO.class);
+
+	public static final String STU_ID = "stuId";
+	public static final String PASSWORD = "password";
+	public static final String NAME = "name";
+	public static final String SEX = "sex";
+	public static final String TEL = "tel";
+	public static final String ADDRESS = "address";
+	public static final String EMAIL = "email";
+	public static final String TYPE = "type";
+
+	/**
+	 * 此方法用于保存一条Student学生记录到数据库
+	 * 返回一个boolean值，如果保存成功返回true，如果保存失败返回false
+	 * @param transientInstance
+	 * @return
+	 */
+	public boolean save(Student transientInstance) {
+		log.debug("saving Student instance");//log对象调用一个debug方法，用于在控制台打印调试信息，此方法被调用的时候控制台就会打印 "saving Student instance"。
+		boolean passed = false;
+		try {
+			Transaction tx = getSession().beginTransaction();//生成一个事物对象，用于处理一次事物（也就是数据库操作）
+			getSession().save(transientInstance);//保存学生记录的具体操作方法(通过session会话调用)
+			tx.commit();//每次事物完成之后都要提交的一个方法
+			log.debug("save successful");
+			passed = true;
+		} catch (RuntimeException re) {
+			log.error("save failed", re);
+			passed = false;
+			throw re;
+		} finally {
+			closeSession();//关闭session会话
+		}
+		return passed;
+	}
+
+	/**
+	 * 删除一条学生记录
+	 * @param persistentInstance
+	 * @return
+	 */
+	public boolean delete(Student persistentInstance) {
+		log.debug("deleting Student instance");
+		boolean passed = false;
+		try {
+			Transaction tx = getSession().beginTransaction();
+			getSession().delete(persistentInstance);
+			tx.commit();
+			log.debug("delete successful");
+			passed = true;
+		} catch (RuntimeException re) {
+			log.error("delete failed", re);
+			passed = false;
+			throw re;
+		} finally {
+			closeSession();
+		}
+		return passed;
+	}
+
+	/**
+	 * 根据数据表Student的唯一标示ID，找到这条记录
+	 * @param id
+	 * @return
+	 */
+	public Student findById(java.lang.Long id) {
+		log.debug("getting Student instance with id: " + id);
+		try {
+			Student instance = (Student) getSession().get(
+					"cn.myexam.model.Student", id);
+			return instance;
+		} catch (RuntimeException re) {
+			log.error("get failed", re);
+			throw re;
+		} finally {
+			closeSession();
+		}
+	}
+
+	/**
+	 * 根据Student对象instance，找到一条学生记录
+	 * @param instance
+	 * @return
+	 */
+	public List findByExample(Student instance) {
+		log.debug("finding Student instance by example");
+		try {
+			List results = getSession()
+					.createCriteria("cn.myexam.model.Student")
+					.add(Example.create(instance)).list();
+			log.debug("find by example successful, result size: "
+					+ results.size());
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by example failed", re);
+			throw re;
+		} finally {
+			closeSession();
+		}
+	}
+
+	/**
+	 * 根据数据库表Student表里的一个字段，查找出符合条件的记录
+	 * 返回所有满足条件记录的一个集合List
+	 * @param propertyName	字段名
+	 * @param value	具体的值，作为条件
+	 * @return
+	 */
+	public List findByProperty(String propertyName, Object value) {
+		log.debug("finding Student instance with property: " + propertyName
+				+ ", value: " + value);
+		try {
+			String queryString = "from Student as model where model."
+					+ propertyName + "= ?";//? 作为一个占位符，用value去替代
+			Query queryObject = getSession().createQuery(queryString);
+			queryObject.setParameter(0, value);//0  表示sql语句中的第一个 问好？，  然后用value去替代？
+			return queryObject.list();
+		} catch (RuntimeException re) {
+			log.error("find by property name failed", re);
+			throw re;
+		} finally {
+			closeSession();
+		}
+	}
+
+	//根据id查询满足条件的记录
+	public List findByStuId(Object stuId) {
+		return findByProperty(STU_ID, stuId);
+	}
+
+	//根据密码查询满足条件的记录
+	public List findByPassword(Object password) {
+		return findByProperty(PASSWORD, password);
+	}
+
+	public List findByName(Object name) {
+		return findByProperty(NAME, name);
+	}
+
+	public List findBySex(Object sex) {
+		return findByProperty(SEX, sex);
+	}
+
+	public List findByTel(Object tel) {
+		return findByProperty(TEL, tel);
+	}
+
+	public List findByAddress(Object address) {
+		return findByProperty(ADDRESS, address);
+	}
+
+	public List findByEmail(Object email) {
+		return findByProperty(EMAIL, email);
+	}
+
+	public List findByType(Object type) {
+		return findByProperty(TYPE, type);
+	}
+
+	public Student merge(Student detachedInstance) {
+		log.debug("merging Student instance");
+		try {
+			Student result = (Student) getSession().merge(detachedInstance);
+			log.debug("merge successful");
+			return result;
+		} catch (RuntimeException re) {
+			log.error("merge failed", re);
+			throw re;
+		} finally {
+			closeSession();
+		}
+	}
+
+	public boolean attachDirty(Student instance) {
+		log.debug("attaching dirty Student instance");
+		boolean passed = false;
+		try {
+			Transaction tx = getSession().beginTransaction();
+			getSession().saveOrUpdate(instance);
+			tx.commit();
+			log.debug("attach successful");
+			passed = true;
+		} catch (RuntimeException re) {
+			log.error("attach failed", re);
+			passed = false;
+			throw re;
+		} finally {
+			closeSession();
+		}
+		return passed;
+	}
+
+	public void attachClean(Student instance) {
+		log.debug("attaching clean Student instance");
+		try {
+			getSession().lock(instance, LockMode.NONE);
+			log.debug("attach successful");
+		} catch (RuntimeException re) {
+			log.error("attach failed", re);
+			throw re;
+		} finally {
+			closeSession();
+		}
+	}
+}

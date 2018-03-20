@@ -1,0 +1,113 @@
+复制代码
+public boolean ChaRu3(User user){
+        boolean flag=true;
+        Connection conn=null;
+        PreparedStatement ps=null;    //创建PreparedStatement 对象
+        String sql= "insert into user (name,pwd) values(?,?)";  //sql语句不再采用拼接方式，应用占位符问号的方式写sql语句。
+        conn=DBConnUtil.getConn();
+        try {
+            ps=conn.prepareStatement(sql);
+            ps.setString(1, user.getName()); //对占位符设置值，占位符顺序从1开始，第一个参数是占位符的位置，第二个参数是占位符的值。
+            ps.setString(2, user.getPwd()); 
+            int i=ps.executeUpdate();
+            if(i==0){
+                flag=false;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }finally{
+            DBConnUtil.closeAll(null, ps, conn);
+        }
+        return flag;
+        
+    }
+复制代码
+ 
+
+2 修改数据
+
+ 
+
+复制代码
+public boolean XiuGai3(User user){
+        boolean flag=true;
+        Connection conn=null;
+        PreparedStatement ps=null;
+        String sql="update user set pwd=? where name=?";
+        conn=DBConnUtil.getConn();
+        try {
+            ps=conn.prepareStatement(sql);
+            ps.setString(1, user.getPwd());
+            ps.setString(2, user.getName());
+            int i= ps.executeUpdate();
+            if(i==0){
+                flag=false;
+            }
+            
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }finally{
+            DBConnUtil.closeAll(null, ps, conn);
+        }
+        return flag;
+    }
+复制代码
+ 
+
+3 删除数据
+
+复制代码
+public boolean ShanChu3(int id){
+        boolean flag=true;
+        Connection conn=null;
+        PreparedStatement ps=null;
+        String sql="delete from user where id=?";
+        conn=DBConnUtil.getConn();
+        try {
+            ps=conn.prepareStatement(sql);
+            ps.setInt(1, id);
+            int i=ps.executeUpdate();
+            if(i==0){
+                flag=false;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }finally{
+            DBConnUtil.closeAll(null, ps, conn);
+        }
+        
+        return flag;
+    }
+复制代码
+ 
+
+4 查看数据
+
+复制代码
+public List<User> ChaKan3(){
+         List<User> list= new ArrayList<User>();
+         Connection conn=null;
+         PreparedStatement ps=null;
+         ResultSet rs=null;
+         String sql="select * from user";
+         conn=DBConnUtil.getConn();
+         try {
+               ps=conn.prepareStatement(sql);
+             rs=ps.executeQuery();
+             while(rs.next()){
+                User user= new User();
+                user.setName(rs.getString("name"));
+                list.add(user);
+             }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }finally{
+            DBConnUtil.closeAll(rs, ps, conn);
+        }
+        
+         return list;
+     }
